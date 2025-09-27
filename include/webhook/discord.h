@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 
+struct Webhook;
+
 struct Credentials {
     Credentials(std::string  id, std::string  secret);
     [[nodiscard]] const std::string& id() const;
@@ -13,7 +15,9 @@ private:
 
 class Discord {
 public:
-    Discord(const std::string& event, const std::string& body, const Credentials& credentials);
+    static void Send(const std::string& event, const std::string& body, const Credentials& credentials);
+private:
+    static void Send(const Webhook& w, const Credentials& credentials);
 };
 
 struct Webhook {

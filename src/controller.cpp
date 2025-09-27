@@ -44,5 +44,5 @@ void Controller::webhook(const drogon::HttpRequestPtr& req, std::function<void(c
     resp->setStatusCode(drogon::HttpStatusCode::k202Accepted);
     callback(resp);
 
-    Discord(event, std::string{req->getBody()}, {id, token});
+    Discord::Send(event, std::string{req->getBody()}, {id, token});
 }

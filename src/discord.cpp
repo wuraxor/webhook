@@ -1,4 +1,5 @@
 #include <utility>
+#include <drogon/HttpClient.h>
 #include <webhook/discord.h>
 #include <webhook/events.h>
 
@@ -28,6 +29,27 @@ const std::string& Credentials::secret() const {
     return _secret;
 }
 
-Discord::Discord(const std::string& event, const std::string& body, const Credentials& credentials) {
-    auto eventFunc = EventMap.at(event);
+void Discord::Send(const std::string& event, const std::string& body, const Credentials& credentials) {
+    auto it = EventMap.find(event);
+    if (it == EventMap.end()) {
+        return;
+    }
+    auto webhook = it->second(Json::Value(body));
+
+    if (webhook.has_value()) {
+        Send(webhook.value(), credentials);
+    }
+}
+
+void Discord::Send(const Webhook& w, const Credentials& credentials) {
+    auto client = drogon::HttpClient::newHttpClient("https://discord.com");
+
+    std::string body = std::format(R"({{"content": {}, "username": {}, "avatar_url": {}}})", w.content, w.username, w.avatarUrl);
+
+    auto request = drogon::HttpRequest::newHttpRequest();
+    request->setPath(std::format("api/{}/webhooks/{}", credentials.id(), credentials.secret()));
+    request->setContentTypeCode(drogon::ContentType::CT_APPLICATION_JSON);
+    request->setBody(body);
+    client->sendRequest(request, [](drogon::ReqResult result, const drogon::HttpResponsePtr& resp) {
+    });
 }
