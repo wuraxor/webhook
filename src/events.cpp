@@ -57,7 +57,7 @@ PullRequest::PullRequest(const Json::Value& j) : action(j["action"].asString()),
 }
 
 Push::Push(const Json::Value& j) : created(j["created"].asBool()), deleted(j["deleted"].asBool()), forced(j["forced"].asBool()),
-    ref(j["forced"].asString()), sender(j["sender"]), pusher(j["pusher"]), repository(j["repository"]) {
+    ref(j["ref"].asString()), sender(j["sender"]), pusher(j["pusher"]), repository(j["repository"]) {
     for (const auto& commit : j["commits"]) {
         commits.emplace_back(commit);
     }
@@ -243,7 +243,7 @@ std::optional<Webhook> PushFunc(const Json::Value& j) {
         action = " force pushed";
     }
 
-    auto branch = e.ref.substr(10);
+    auto branch = e.ref.substr(11);
 
     auto footer = std::format("\n- [{}](<{}>){} on [{}](<{}>)/[{}](<{}/tree/{}>)",
         e.pusher.name,
@@ -252,8 +252,8 @@ std::optional<Webhook> PushFunc(const Json::Value& j) {
         e.repository.name,
         e.repository.htmlUrl,
         branch,
-        branch,
         e.repository.htmlUrl,
+        branch,
         branch
     );
 
@@ -274,7 +274,7 @@ std::optional<Webhook> PushFunc(const Json::Value& j) {
         }
 
         auto commitMsg = first;
-        if (commitMsg.size() > 1) {
+        if (lines.size() > 1) {
             commitMsg += "...";
         }
 

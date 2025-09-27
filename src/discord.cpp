@@ -34,7 +34,9 @@ void Discord::Send(const std::string& event, const std::string& body, const Cred
     if (it == EventMap.end()) {
         return;
     }
-    auto webhook = it->second(Json::Value(body));
+    Json::Value bodyJson;
+    Json::Reader().parse(body, bodyJson);
+    auto webhook = it->second(bodyJson);
 
     if (webhook.has_value()) {
         Send(webhook.value(), credentials);
@@ -44,12 +46,20 @@ void Discord::Send(const std::string& event, const std::string& body, const Cred
 void Discord::Send(const Webhook& w, const Credentials& credentials) {
     auto client = drogon::HttpClient::newHttpClient("https://discord.com");
 
-    std::string body = std::format(R"({{"content": {}, "username": {}, "avatar_url": {}}})", w.content, w.username, w.avatarUrl);
+    Json::Value bodyj;
+    bodyj["content"] = w.content;
+    bodyj["username"] = w.username;
+    bodyj["avatar_url"] = w.avatarUrl;
+
+    Json::FastWriter writer;
+    std::string body = writer.write(bodyj);
 
     auto request = drogon::HttpRequest::newHttpRequest();
-    request->setPath(std::format("api/{}/webhooks/{}", credentials.id(), credentials.secret()));
+    request->setPath(std::format("/api/webhooks/{}/{}", credentials.id(), credentials.secret()));
     request->setContentTypeCode(drogon::ContentType::CT_APPLICATION_JSON);
     request->setBody(body);
-    client->sendRequest(request, [](drogon::ReqResult result, const drogon::HttpResponsePtr& resp) {
+    request->setMethod(drogon::Post);
+
+    client->sendRequest(request, [](drogon::ReqResult result, const drogon::HttpResponsePtr& res) {
     });
 }
