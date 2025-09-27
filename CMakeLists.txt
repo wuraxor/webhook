@@ -9,6 +9,12 @@ add_executable(webhook
         src/server.cpp
         src/controller.cpp
         src/main.cpp
+        src/discord.cpp
+        include/webhook/discord.h
+        src/events.cpp
+        include/webhook/events.h
+        src/github.cpp
+        include/webhook/github.h
 )
 
 target_include_directories(webhook PUBLIC include/)
