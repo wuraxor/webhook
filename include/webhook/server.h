@@ -1,7 +1,10 @@
 #pragma once
+#include <ixwebsocket/IXHttpServer.h>
 
 class Server {
 public:
-    Server() = default;
+    Server();
     void start();
+private:
+    ix::HttpServer server;
 };

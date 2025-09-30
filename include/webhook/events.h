@@ -1,26 +1,25 @@
 #pragma once
-#include <json/value.h>
 #include <webhook/discord.h>
 #include <webhook/github.h>
 
 struct CheckRun {
-    explicit CheckRun(const Json::Value&);
+    explicit CheckRun(const nlohmann::json&);
 
     std::string action;
 
     struct checkRun {
-        explicit checkRun(const Json::Value&);
+        explicit checkRun(const nlohmann::json&);
 
         std::string conclusion;
         std::string htmlUrl;
 
         struct app {
-            explicit app(const Json::Value&);
+            explicit app(const nlohmann::json&);
             std::string name;
         } app;
 
         struct checkSuite {
-            explicit checkSuite(const Json::Value&);
+            explicit checkSuite(const nlohmann::json&);
             std::string headBranch;
         } checkSuite;
 
@@ -30,10 +29,10 @@ struct CheckRun {
 };
 
 struct Fork {
-    explicit Fork(const Json::Value&);
+    explicit Fork(const nlohmann::json&);
 
     struct forkee {
-        explicit forkee(const Json::Value&);
+        explicit forkee(const nlohmann::json&);
         std::string name;
         std::string htmlUrl;
     } forkee;
@@ -42,7 +41,7 @@ struct Fork {
 };
 
 struct Issues {
-    explicit Issues(const Json::Value&);
+    explicit Issues(const nlohmann::json&);
 
     std::string action;
     github::Issue issue;
@@ -51,12 +50,12 @@ struct Issues {
 };
 
 struct IssueComment {
-    explicit IssueComment(const Json::Value&);
+    explicit IssueComment(const nlohmann::json&);
 
     std::string action;
 
     struct comment {
-        explicit comment(const Json::Value&);
+        explicit comment(const nlohmann::json&);
         std::string body;
         std::string htmlUrl;
     } comment;
@@ -67,14 +66,14 @@ struct IssueComment {
 };
 
 struct Public {
-    explicit Public(const Json::Value&);
+    explicit Public(const nlohmann::json&);
 
     github::Repository repository;
     github::User sender;
 };
 
 struct PullRequest {
-    explicit PullRequest(const Json::Value&);
+    explicit PullRequest(const nlohmann::json&);
 
     std::string action;
     github::Issue pullRequest;
@@ -83,10 +82,10 @@ struct PullRequest {
 };
 
 struct Push {
-    explicit Push(const Json::Value&);
+    explicit Push(const nlohmann::json&);
 
     struct commits {
-        explicit commits(const Json::Value&);
+        explicit commits(const nlohmann::json&);
         std::string id;
         std::string url;
         std::string message;
@@ -103,12 +102,12 @@ struct Push {
 };
 
 struct Release {
-    explicit Release(const Json::Value&);
+    explicit Release(const nlohmann::json&);
 
     std::string action;
 
     struct release {
-        explicit release(const Json::Value&);
+        explicit release(const nlohmann::json&);
         std::string htmlUrl;
         std::string tagName;
     } release;
@@ -117,16 +116,16 @@ struct Release {
 };
 
 struct Repository {
-    explicit Repository(const Json::Value&);
+    explicit Repository(const nlohmann::json&);
 
     std::string action;
 
     struct changes {
-        explicit changes(const Json::Value&);
+        explicit changes(const nlohmann::json&);
         struct repository {
-            explicit repository(const Json::Value&);
+            explicit repository(const nlohmann::json&);
             struct name {
-                explicit name(const Json::Value&);
+                explicit name(const nlohmann::json&);
                 std::string from;
             } name;
         } repository;
@@ -137,7 +136,7 @@ struct Repository {
 };
 
 struct Star {
-    explicit Star(const Json::Value&);
+    explicit Star(const nlohmann::json&);
 
     std::string action;
     github::User sender;
@@ -145,18 +144,18 @@ struct Star {
 };
 
 struct WorkflowRun {
-    explicit WorkflowRun(const Json::Value&);
+    explicit WorkflowRun(const nlohmann::json&);
 
     std::string action;
 
     struct workflow {
-        explicit workflow(const Json::Value&);
+        explicit workflow(const nlohmann::json&);
 
         std::string name;
     } workflow;
 
     struct workflowRun {
-        explicit workflowRun(const Json::Value&);
+        explicit workflowRun(const nlohmann::json&);
 
         std::string conclusion;
         std::string htmlUrl;
@@ -166,24 +165,24 @@ struct WorkflowRun {
     github::Repository repository;
 };
 
-std::optional<Webhook> CheckRunFunc(const Json::Value&);
+std::optional<Webhook> CheckRunFunc(const nlohmann::json&);
 
-std::optional<Webhook> ForkFunc(const Json::Value&);
+std::optional<Webhook> ForkFunc(const nlohmann::json&);
 
-std::optional<Webhook> IssuesFunc(const Json::Value&);
+std::optional<Webhook> IssuesFunc(const nlohmann::json&);
 
-std::optional<Webhook> IssueCommentFunc(const Json::Value&);
+std::optional<Webhook> IssueCommentFunc(const nlohmann::json&);
 
-std::optional<Webhook> PublicFunc(const Json::Value&);
+std::optional<Webhook> PublicFunc(const nlohmann::json&);
 
-std::optional<Webhook> PullRequestFunc(const Json::Value&);
+std::optional<Webhook> PullRequestFunc(const nlohmann::json&);
 
-std::optional<Webhook> PushFunc(const Json::Value&);
+std::optional<Webhook> PushFunc(const nlohmann::json&);
 
-std::optional<Webhook> ReleaseFunc(const Json::Value&);
+std::optional<Webhook> ReleaseFunc(const nlohmann::json&);
 
-std::optional<Webhook> RepositoryFunc(const Json::Value&);
+std::optional<Webhook> RepositoryFunc(const nlohmann::json&);
 
-std::optional<Webhook> StarFunc(const Json::Value&);
+std::optional<Webhook> StarFunc(const nlohmann::json&);
 
-std::optional<Webhook> WorkflowRunFunc(const Json::Value&);
+std::optional<Webhook> WorkflowRunFunc(const nlohmann::json&);

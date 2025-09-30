@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <json/value.h>
+#include <nlohmann/json.hpp>
 
 namespace github {
     struct User {
@@ -8,19 +8,19 @@ namespace github {
         std::string login;
         std::string avatarUrl;
         std::string htmlUrl;
-        User(const Json::Value&);
+        User(const nlohmann::json&);
     };
 
     struct Repository {
         std::string name;
         std::string htmlUrl;
         User owner;
-        Repository(const Json::Value&);
+        Repository(const nlohmann::json&);
     };
 
     struct Issue {
         std::string title;
         std::string htmlUrl;
-        Issue(const Json::Value&);
+        Issue(const nlohmann::json&);
     };
 }

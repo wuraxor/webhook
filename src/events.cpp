@@ -1,5 +1,6 @@
 #include <regex>
 #include <webhook/events.h>
+#include <nlohmann/json.hpp>
 
 std::vector<std::string> split(const std::string& s, const std::string& delimiter) {
     size_t pos_start = 0, pos_end, delim_len = delimiter.length();
@@ -18,83 +19,100 @@ std::vector<std::string> split(const std::string& s, const std::string& delimite
 
 const static auto linkRe = std::regex(R"(\[([^]]+)]\((https?://[^)]+)\))");
 
-CheckRun::CheckRun(const Json::Value& j) : action(j["action"].asString()), checkRun(j["check_run"].asString()),
-    repository(j["repository"].asString()) {
+CheckRun::CheckRun(const nlohmann::json& j) : action(j.at("action").get<std::string>()),
+                                              checkRun(j.at("check_run").get<std::string>()),
+                                              repository(j.at("repository").get<std::string>()) {
 }
 
-CheckRun::checkRun::checkRun(const Json::Value& j) : conclusion(j["conclusion"].asString()), htmlUrl(j["html_url"].asString()),
-    app(j["app"]), checkSuite(j["check_suite"]) {
+CheckRun::checkRun::checkRun(const nlohmann::json& j) : conclusion(j.at("conclusion").get<std::string>()),
+                                                        htmlUrl(j.at("html_url").get<std::string>()),
+                                                        app(j.at("app")), checkSuite(j.at("check_suite")) {
 }
 
-CheckRun::checkRun::app::app(const Json::Value& j) : name(j["name"].asString()) {
+CheckRun::checkRun::app::app(const nlohmann::json& j) : name(j.at("name").get<std::string>()) {
 }
 
-CheckRun::checkRun::checkSuite::checkSuite(const Json::Value& j) : headBranch(j["head_branch"].asString()) {
+CheckRun::checkRun::checkSuite::checkSuite(const nlohmann::json& j) : headBranch(j.at("head_branch").get<std::string>()) {
 }
 
-Fork::Fork(const Json::Value& j) : forkee(j["forkee"]), sender(j["sender"]) {
+Fork::Fork(const nlohmann::json& j) : forkee(j.at("forkee")), sender(j.at("sender")) {
 }
 
-Fork::forkee::forkee(const Json::Value& j) : name(j["name"].asString()), htmlUrl(j["html_url"].asString()) {
+Fork::forkee::forkee(const nlohmann::json& j) : name(j.at("name").get<std::string>()),
+                                                htmlUrl(j.at("html_url").get<std::string>()) {
 }
 
-Issues::Issues(const Json::Value& j) : action(j["action"].asString()), issue(j["issue"]), repository(j["repository"]),
-    sender(j["sender"]){
+Issues::Issues(const nlohmann::json& j) : action(j.at("action").get<std::string>()), issue(j.at("issue")),
+                                          repository(j.at("repository")),
+                                          sender(j.at("sender")){
 }
 
-IssueComment::IssueComment(const Json::Value& j) : action(j["action"].asString()), comment(j["comment"]), issue(j["issue"]),
-    repository(j["repository"]), sender(j["sender"]) {
+IssueComment::IssueComment(const nlohmann::json& j) : action(j.at("action").get<std::string>()),
+                                                      comment(j.at("comment")), issue(j.at("issue")),
+                                                      repository(j.at("repository")), sender(j.at("sender")) {
 }
 
-IssueComment::comment::comment(const Json::Value& j) : body(j["body"].asString()), htmlUrl(j["html_url"].asString()) {
+IssueComment::comment::comment(const nlohmann::json& j) : body(j.at("body").get<std::string>()),
+                                                          htmlUrl(j.at("html_url").get<std::string>()) {
 }
 
-Public::Public(const Json::Value& j) : repository(j["repository"]), sender(j["sender"]) {
+Public::Public(const nlohmann::json& j) : repository(j.at("repository")), sender(j.at("sender")) {
 }
 
-PullRequest::PullRequest(const Json::Value& j) : action(j["action"].asString()), pullRequest(j["pull_request"]),
-    repository(j["repository"]), sender(j["sender"]) {
+PullRequest::PullRequest(const nlohmann::json& j) : action(j.at("action").get<std::string>()),
+                                                    pullRequest(j.at("pull_request")), repository(j.at("repository")),
+                                                    sender(j.at("sender")) {
 }
 
-Push::Push(const Json::Value& j) : created(j["created"].asBool()), deleted(j["deleted"].asBool()), forced(j["forced"].asBool()),
-    ref(j["ref"].asString()), sender(j["sender"]), pusher(j["pusher"]), repository(j["repository"]) {
-    for (const auto& commit : j["commits"]) {
+Push::Push(const nlohmann::json& j) : created(j.at("created").get<bool>()), deleted(j.at("deleted").get<bool>()),
+                                      forced(j.at("forced").get<bool>()), ref(j.at("ref").get<std::string>()),
+                                      sender(j.at("sender")), pusher(j.at("pusher")), repository(j.at("repository")) {
+    for (const auto& commit : j.at("commits")) {
         commits.emplace_back(commit);
     }
 }
 
-Push::commits::commits(const Json::Value& j) : id(j["id"].asString()), url(j["url"].asString()), message(j["message"].asString()) {
+Push::commits::commits(const nlohmann::json& j) : id(j.at("id").get<std::string>()),
+                                                  url(j.at("url").get<std::string>()),
+                                                  message(j.at("message").get<std::string>()) {
 }
 
-Release::Release(const Json::Value& j) : action(j["action"].asString()), release(j["release"]), sender(j["sender"]) {
+Release::Release(const nlohmann::json& j) : action(j.at("action").get<std::string>()), release(j.at("release")),
+                                            sender(j.at("sender")) {
 }
 
-Release::release::release(const Json::Value& j) : htmlUrl(j["html_url"].asString()), tagName(j["tag_name"].asString()) {
+Release::release::release(const nlohmann::json& j) : htmlUrl(j.at("html_url").get<std::string>()),
+                                                     tagName(j.at("tag_name").get<std::string>()) {
 }
 
-Repository::Repository(const Json::Value& j) : action(j["action"].asString()), changes(j["changes"]), repository(j["repository"]), sender(j["sender"]) {
+Repository::Repository(const nlohmann::json& j) : action(j.at("action").get<std::string>()), changes(j.at("changes")),
+                                                  repository(j.at("repository")), sender(j.at("sender")) {
 }
 
-Repository::changes::changes(const Json::Value& j) : repository(j["repository"]) {
+Repository::changes::changes(const nlohmann::json& j) : repository(j.at("repository")) {
 }
 
-Repository::changes::repository::repository(const Json::Value& j) : name(j["name"]) {
+Repository::changes::repository::repository(const nlohmann::json& j) : name(j.at("name")) {
 }
 
-Repository::changes::repository::name::name(const Json::Value& j) : from(j["from"].asString()) {
+Repository::changes::repository::name::name(const nlohmann::json& j) : from(j.at("from").get<std::string>()) {
 }
 
-Star::Star(const Json::Value& j) : action(j["action"].asString()), sender(j["sender"]), repository(j["repository"])  {
+Star::Star(const nlohmann::json& j) : action(j.at("action").get<std::string>()), sender(j.at("sender")),
+                                      repository(j.at("repository")) {
 }
 
-WorkflowRun::WorkflowRun(const Json::Value& j) : action(j["action"].asString()), workflow(j["workflow"]), workflowRun(j["workflow_run"]), repository(j["repository"]) {
+WorkflowRun::WorkflowRun(const nlohmann::json& j) : action(j.at("action").get<std::string>()),
+                                                    workflow(j.at("workflow")), workflowRun(j.at("workflow_run")),
+                                                    repository(j.at("repository")) {
 }
 
-WorkflowRun::workflow::workflow(const Json::Value& j) : name(j["name"].asString()) {
+WorkflowRun::workflow::workflow(const nlohmann::json& j) : name(j.at("name").get<std::string>()) {
 }
 
-WorkflowRun::workflowRun::workflowRun(const Json::Value& j) : conclusion(j["conclusion"].asString()), htmlUrl(j["html_url"].asString()),
-    headBranch(j["head_branch"].asString()) {
+WorkflowRun::workflowRun::workflowRun(const nlohmann::json& j) : conclusion(j.at("conclusion").get<std::string>()),
+                                                                 htmlUrl(j.at("html_url").get<std::string>()),
+                                                                 headBranch(j.at("head_branch").get<std::string>()) {
 }
 
 const static auto ignoredChecks = std::array<std::string, 3>{
@@ -103,7 +121,7 @@ const static auto ignoredChecks = std::array<std::string, 3>{
     "GitHub Advanced Security",
 };
 
-std::optional<Webhook> CheckRunFunc(const Json::Value& j) {
+std::optional<Webhook> CheckRunFunc(const nlohmann::json& j) {
     CheckRun e(j);
     if (e.action != "completed" || e.checkRun.conclusion.empty()) {
         return {};
@@ -128,7 +146,7 @@ std::optional<Webhook> CheckRunFunc(const Json::Value& j) {
     };
 }
 
-std::optional<Webhook> ForkFunc(const Json::Value& j) {
+std::optional<Webhook> ForkFunc(const nlohmann::json& j) {
     Fork e(j);
     return Webhook{
         e.sender.login,
@@ -142,7 +160,7 @@ std::optional<Webhook> ForkFunc(const Json::Value& j) {
     };
 }
 
-std::optional<Webhook> IssuesFunc(const Json::Value& j) {
+std::optional<Webhook> IssuesFunc(const nlohmann::json& j) {
     Issues e(j);
     return Webhook{
         e.sender.login,
@@ -161,7 +179,7 @@ std::optional<Webhook> IssuesFunc(const Json::Value& j) {
     };
 }
 
-std::optional<Webhook> IssueCommentFunc(const Json::Value& j) {
+std::optional<Webhook> IssueCommentFunc(const nlohmann::json& j) {
     IssueComment e(j);
     return Webhook{
         e.sender.login,
@@ -180,7 +198,7 @@ std::optional<Webhook> IssueCommentFunc(const Json::Value& j) {
     };
 }
 
-std::optional<Webhook> PublicFunc(const Json::Value& j) {
+std::optional<Webhook> PublicFunc(const nlohmann::json& j) {
     Public e(j);
     return Webhook{
         e.sender.login,
@@ -199,7 +217,7 @@ const static auto ignoredPullRequestActions = std::array<std::string, 2> {
     "synchronize"
 };
 
-std::optional<Webhook> PullRequestFunc(const Json::Value& j) {
+std::optional<Webhook> PullRequestFunc(const nlohmann::json& j) {
     PullRequest e(j);
     if (e.action.contains("_")) {
         return {};
@@ -226,7 +244,7 @@ std::optional<Webhook> PullRequestFunc(const Json::Value& j) {
     };
 }
 
-std::optional<Webhook> PushFunc(const Json::Value& j) {
+std::optional<Webhook> PushFunc(const nlohmann::json& j) {
     Push e(j);
     if (!e.ref.starts_with("refs/heads")) {
         return {};
@@ -305,7 +323,7 @@ std::optional<Webhook> PushFunc(const Json::Value& j) {
     };
 }
 
-std::optional<Webhook> ReleaseFunc(const Json::Value& j) {
+std::optional<Webhook> ReleaseFunc(const nlohmann::json& j) {
     Release e(j);
     if (e.action != "published") {
         return {};
@@ -331,7 +349,7 @@ const static auto supportedRepositoryActions = std::array<std::string, 4> {
     "unarchived"
 };
 
-std::optional<Webhook> RepositoryFunc(const Json::Value& j) {
+std::optional<Webhook> RepositoryFunc(const nlohmann::json& j) {
     Repository e(j);
     if (std::ranges::find(supportedRepositoryActions, e.action)) {
         return {};
@@ -371,7 +389,7 @@ std::optional<Webhook> RepositoryFunc(const Json::Value& j) {
     };
 }
 
-std::optional<Webhook> StarFunc(const Json::Value& j) {
+std::optional<Webhook> StarFunc(const nlohmann::json& j) {
     Star e(j);
     if (e.action != "created") {
         return {};
@@ -395,7 +413,7 @@ const static auto ignoredWorkflows = std::array<std::string, 3> {
     "Automatic Dependency Submission",
 };
 
-std::optional<Webhook> WorkflowRunFunc(const Json::Value& j) {
+std::optional<Webhook> WorkflowRunFunc(const nlohmann::json& j) {
     WorkflowRun e(j);
     if (e.action != "completed" || e.workflowRun.conclusion.empty()) {
         return {};

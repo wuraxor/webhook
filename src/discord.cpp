@@ -1,9 +1,10 @@
+#include <iostream>
 #include <utility>
-#include <drogon/HttpClient.h>
 #include <webhook/discord.h>
 #include <webhook/events.h>
+#include <ixwebsocket/IXHttpClient.h>
 
-using EventFunc = std::optional<Webhook>(*)(const Json::Value&);
+using EventFunc = std::optional<Webhook>(*)(const nlohmann::json&);
 
 static const std::map<std::string, EventFunc> EventMap = {
     {"check_run", &CheckRunFunc},
@@ -34,8 +35,7 @@ void Discord::Send(const std::string& event, const std::string& body, const Cred
     if (it == EventMap.end()) {
         return;
     }
-    Json::Value bodyJson;
-    Json::Reader().parse(body, bodyJson);
+    nlohmann::json bodyJson = nlohmann::json::parse(body);
     auto webhook = it->second(bodyJson);
 
     if (webhook.has_value()) {
@@ -44,22 +44,11 @@ void Discord::Send(const std::string& event, const std::string& body, const Cred
 }
 
 void Discord::Send(const Webhook& w, const Credentials& credentials) {
-    auto client = drogon::HttpClient::newHttpClient("https://discord.com");
+    nlohmann::json bodyj = {{"content", w.content}, {"username", w.username}, {"avatar_url", w.avatarUrl}};
+    std::string body = to_string(bodyj);
 
-    Json::Value bodyj;
-    bodyj["content"] = w.content;
-    bodyj["username"] = w.username;
-    bodyj["avatar_url"] = w.avatarUrl;
-
-    Json::FastWriter writer;
-    std::string body = writer.write(bodyj);
-
-    auto request = drogon::HttpRequest::newHttpRequest();
-    request->setPath(std::format("/api/webhooks/{}/{}", credentials.id(), credentials.secret()));
-    request->setContentTypeCode(drogon::ContentType::CT_APPLICATION_JSON);
-    request->setBody(body);
-    request->setMethod(drogon::Post);
-
-    client->sendRequest(request, [](drogon::ReqResult result, const drogon::HttpResponsePtr& res) {
-    });
+    ix::HttpClient httpClient;
+    ix::HttpRequestArgsPtr args = httpClient.createRequest();
+    args->extraHeaders = {{"content-type", "application/json"}, {"origin", "localhost"}};
+    auto res = httpClient.post(std::format("https://discord.com/api/webhooks/{}/{}", credentials.id(), credentials.secret()), body, args);
 }
