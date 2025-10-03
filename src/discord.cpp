@@ -3,6 +3,7 @@
 #include <webhook/discord.h>
 #include <webhook/events.h>
 #include <ixwebsocket/IXHttpClient.h>
+#include <webhook/config.h>
 
 using EventFunc = std::optional<Webhook>(*)(const nlohmann::json&);
 
@@ -48,6 +49,11 @@ void Discord::Send(const Webhook& w, const Credentials& credentials) {
     std::string body = to_string(bodyj);
 
     ix::HttpClient httpClient;
+    if (!Config::certFile().empty()) {
+        ix::SocketTLSOptions tlsOptions;
+        tlsOptions.caFile = Config::certFile();
+        httpClient.setTLSOptions(tlsOptions);
+    }
     ix::HttpRequestArgsPtr args = httpClient.createRequest();
     args->extraHeaders = {{"content-type", "application/json"}, {"origin", "localhost"}};
     auto res = httpClient.post(std::format("https://discord.com/api/webhooks/{}/{}", credentials.id(), credentials.secret()), body, args);

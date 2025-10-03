@@ -1,6 +1,7 @@
 #include <regex>
 #include <webhook/events.h>
 #include <nlohmann/json.hpp>
+#include <webhook/config.h>
 
 std::vector<std::string> split(const std::string& s, const std::string& delimiter) {
     size_t pos_start = 0, pos_end, delim_len = delimiter.length();
@@ -131,10 +132,16 @@ std::optional<Webhook> CheckRunFunc(const nlohmann::json& j) {
         return {};
     }
 
+    auto emoji = Config::successEmoji();
+    if (e.checkRun.conclusion == "failure") {
+        emoji = Config::failureEmoji();
+    }
+
     return Webhook {
         e.checkRun.app.name,
         e.repository.owner.avatarUrl,
-        std::format("Check [{}](<{}>) on [{}](<{}>)/[{}](<{}/tree/{}>)",
+        std::format("{} Check [{}](<{}>) on [{}](<{}>)/[{}](<{}/tree/{}>)",
+            emoji,
             e.checkRun.conclusion,
             e.checkRun.htmlUrl,
             e.repository.name,
@@ -203,11 +210,12 @@ std::optional<Webhook> PublicFunc(const nlohmann::json& j) {
     return Webhook{
         e.sender.login,
         e.sender.avatarUrl,
-        std::format("[{}](<{}>) made [{}](<{}>) public",
+        std::format("[{}](<{}>) made [{}](<{}>) public {}",
             e.sender.login,
             e.sender.htmlUrl,
             e.repository.name,
-            e.repository.htmlUrl
+            e.repository.htmlUrl,
+            Config::happyEmoji()
         )
     };
 }
@@ -358,17 +366,22 @@ std::optional<Webhook> RepositoryFunc(const nlohmann::json& j) {
     std::string content = std::format("[{}](<{}>) ", e.sender.login, e.sender.htmlUrl);
 
     if (e.action == "archived" || e.action == "unarchived") {
+        std::string emoji;
+        if (e.action == "archived") {
+            emoji = "😭";
+        } else {
+            emoji = Config::happyEmoji();
+        }
         content += std::format(
-            "{} [{}](<{}>)",
+            "{} [{}](<{}>) {}",
             e.action,
             e.repository.name,
-            e.repository.htmlUrl
+            e.repository.htmlUrl,
+            emoji
         );
     } else if (e.action == "privatized") {
         content += std::format(
-            "renamed [{}](<{}>) to [{}](<{}>)",
-            e.changes.repository.name.from,
-            e.repository.htmlUrl,
+            "made [{}](<{}>) private 🖕",
             e.repository.name,
             e.repository.htmlUrl
         );
@@ -398,11 +411,12 @@ std::optional<Webhook> StarFunc(const nlohmann::json& j) {
     return Webhook{
         e.sender.login,
         e.sender.avatarUrl,
-        std::format("[{}](<{}>) starred [{}](<{}>)",
+        std::format("[{}](<{}>) starred [{}](<{}>) {}",
             e.sender.login,
             e.sender.htmlUrl,
             e.repository.name,
-            e.repository.htmlUrl
+            e.repository.htmlUrl,
+            Config::happyEmoji()
         )
     };
 }
@@ -423,10 +437,16 @@ std::optional<Webhook> WorkflowRunFunc(const nlohmann::json& j) {
         return {};
     }
 
+    auto emoji = Config::successEmoji();
+    if (e.workflowRun.conclusion == "failure") {
+        emoji = Config::failureEmoji();
+    }
+
     return Webhook{
         e.workflow.name,
         e.repository.owner.avatarUrl,
-        std::format("Workflow [{}](<{}>) on [{}](<{}>)/[{}](<{}/tree/{}>)",
+        std::format("{} Workflow [{}](<{}>) on [{}](<{}>)/[{}](<{}/tree/{}>)",
+            emoji,
             e.workflowRun.conclusion,
             e.workflowRun.htmlUrl,
             e.repository.name,

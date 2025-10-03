@@ -1,5 +1,6 @@
 #include <iostream>
 #include <regex>
+#include <webhook/config.h>
 #include <webhook/discord.h>
 #include <webhook/server.h>
 
@@ -10,7 +11,7 @@ static auto githubSig = "X-Hub-Signature-256";
 static auto githubSigPrefix = "sha256=";
 static auto githubUserAgentPrefix = "GitHub-Hookshot/";
 
-Server::Server() : server(8080) {
+Server::Server() : server(Config::port(), Config::hostname()) {
     auto res = server.listen();
     if (!res.first) {
     std::cerr << res.second << std::endl;

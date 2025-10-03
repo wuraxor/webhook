@@ -14,6 +14,8 @@ add_executable(webhook
         include/webhook/events.h
         src/github.cpp
         include/webhook/github.h
+        src/config.cpp
+        include/webhook/config.h
 )
 
 target_include_directories(webhook PUBLIC include/)

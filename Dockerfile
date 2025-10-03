@@ -10,5 +10,7 @@ RUN CMAKE_FIND_LIBRARY_SUFFIXES=".a" CXXFLAGS="-s -Oz" CFLAGS="-s" CC="gcc" CXX=
     && cmake --build .
 
 FROM scratch
+COPY --from=builder /etc/ssl/cert.pem /ca.pem
 COPY --from=builder /app/build/webhook .
+ENV CERT_FILE="/ca.pem"
 CMD ["/webhook"]
